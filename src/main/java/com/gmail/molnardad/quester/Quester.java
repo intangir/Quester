@@ -206,7 +206,7 @@ public class Quester extends JavaPlugin {
 				getServer().getPluginManager().registerEvents(new Citizens2Listener(), this);
 			}
 			if(epicboss) {
-				getServer().getPluginManager().registerEvents(new BossDeathListener(), this);
+				//getServer().getPluginManager().registerEvents(new BossDeathListener(), this);
 			}
 		}
 		

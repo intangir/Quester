@@ -182,6 +182,18 @@ public class QuestManager {
 	public Quest getPlayerQuest(String playerName) {
 		return getQuest(getProfile(playerName).getQuest());
 	}
+
+	public List<Quest> getPlayerQuests(String playerName) {
+		
+		List<Quest> quests = new ArrayList<Quest>();
+		
+		for(String quest : getProfile(playerName).getQuests()) {
+			Quest q = getQuest(quest);
+			if(q != null)
+				quests.add(q);
+		}
+		return quests;
+	}
 	
 	public Quest getPlayerQuest(String playerName, int index) {
 		if(index < 0) {

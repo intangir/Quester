@@ -182,6 +182,22 @@ public class PlayerProfile {
 		return "";
 	}
 	
+	public List<String> getQuests() {
+		
+		List<String> quests = new ArrayList<String>();
+		
+		// add selected first
+		quests.add(getQuest());
+		
+		// add the rest
+		for(Progress progress : progresses) {
+			if(progress != quest)
+				quests.add(progress.quest);
+		}
+		
+		return quests;
+	}
+	
 	public boolean hasQuest(String questName) {
 		for(int i=0; i<progresses.size(); i++) {
 			if(progresses.get(i) != null && questName.equalsIgnoreCase(progresses.get(i).quest)) {

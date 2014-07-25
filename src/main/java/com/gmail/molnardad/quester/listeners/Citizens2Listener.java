@@ -98,29 +98,44 @@ public class Citizens2Listener implements Listener {
 				return;
 			}
 			int selected = qh.getSelected();
+			Quest progressed = null;
 			List<Integer> qsts = qh.getQuests();
 			
-			Quest currentQuest = qm.getPlayerQuest(player.getName());
+			List<Quest> currentQuests = qm.getPlayerQuests(player.getName());
 			if(!player.isSneaking()) {
-				int questID = currentQuest == null ? -1 : currentQuest.getID();
-				// player has quest and quest giver does not accept this quest
-				if(questID >= 0 && !qsts.contains(questID)) {
-					player.sendMessage(ChatColor.RED + Quester.strings.ERROR_Q_NOT_HERE);
-					return;
-				}
-				// player has quest and quest giver accepts this quest
-				if(questID >= 0 && qsts.contains(questID)) {
-					try {
-						qm.complete(player, false);
-					} catch (QuesterException e) {
+
+				// cycle through all quests they have, determine the first that can be completed, or at least progressed
+				for(Quest quest : currentQuests) {
+					int questID = quest.getID();
+
+					// quest giver accepts this quest
+					if(questID >= 0 && qsts.contains(questID)) {
 						try {
-							qm.showProgress(player);
-						} catch (QuesterException f) {
-							player.sendMessage(ChatColor.DARK_PURPLE + Quester.strings.ERROR_INTERESTING);
+							// switch and see if its completed
+							qm.switchQuest(player, questID);
+							qm.complete(player, false);
+							return;
+						} catch (QuesterException e) {
+							// must not be complete, save it for if we resort to displaying progress instead 
+							if(progressed == null) {
+								progressed = quest;
+							}
 						}
 					}
-					return;
 				}
+				
+				// no quests completed, did any progress at least?
+				if(progressed != null) {
+					try {
+						qm.switchQuest(player, progressed.getID());
+						qm.showProgress(player);
+						return;
+					} catch (QuesterException f) {
+						player.sendMessage(ChatColor.DARK_PURPLE + Quester.strings.ERROR_INTERESTING);
+					}
+				}
+
+				// holder has none of your quests, default to picking up the quest
 			}
 			// player doesn't have quest
 			if(qm.isQuestActive(selected)) {

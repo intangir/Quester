@@ -350,7 +350,7 @@ public class QuesterStrings extends CustomConfig {
 	
 	public String ERROR_Q_EXIST = "Quest already exists.";
 	public String ERROR_Q_NOT_EXIST = "Quest does not exist.";
-	public String ERROR_Q_NOT_SELECTED = "No quest selected.";
+	public String ERROR_Q_NOT_SELECTED = "Left Click to select a quest.";
 	public String ERROR_Q_CANT_MODIFY = "Modification of active quests is not allowed.";
 	public String ERROR_Q_NONE = "No quest available.";
 	public String ERROR_Q_NONE_ACTIVE = "No quest active.";
