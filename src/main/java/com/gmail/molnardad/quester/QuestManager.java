@@ -785,10 +785,14 @@ public class QuestManager {
 		}
 	}
 	
-	public boolean switchQuest(Player player, int id) {
-		return getProfile(player.getName()).setQuest(id);
+	public boolean switchQuest(Player player, int index) {
+		return getProfile(player.getName()).setQuest(index);
 	}
 	
+	public boolean switchQuest(Player player, Quest quest) {
+		return getProfile(player.getName()).setQuest(quest.getName());
+	}
+
 	public void incProgress(Player player, int id) {
 		incProgress(player, id, 1, true);
 	}

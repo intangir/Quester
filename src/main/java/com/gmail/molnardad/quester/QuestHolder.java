@@ -41,9 +41,10 @@ public class QuestHolder {
 	public int getSelected() {
 		if(heldQuests.size() > selected && selected >= 0) {
 			return heldQuests.get(selected);
-		} else if(heldQuests.size() == 1 && selected == -1) {
-			// if holder has only 1 quest, default to it without needing to select it
-			return selected = 0;
+		} else if(heldQuests.size() >= 1 && selected == -1) {
+			// if holder has quests, auto select first one
+			selected = 0;
+			return heldQuests.get(0);
 		} else
 			return selected = -1;
 	}

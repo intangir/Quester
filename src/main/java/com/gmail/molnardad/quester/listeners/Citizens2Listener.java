@@ -112,12 +112,12 @@ public class Citizens2Listener implements Listener {
 					if(questID >= 0 && qsts.contains(questID)) {
 						try {
 							// switch and see if its completed
-							qm.switchQuest(player, questID);
+							qm.switchQuest(player, quest);
 							qm.complete(player, false);
 							return;
 						} catch (QuesterException e) {
-							// must not be complete, save it for if we resort to displaying progress instead 
-							if(progressed == null) {
+							// must not be complete, save it for if we resort to displaying progress instead, only show progress if we had it selected 
+							if(progressed == null && questID == selected) {
 								progressed = quest;
 							}
 						}
@@ -127,20 +127,23 @@ public class Citizens2Listener implements Listener {
 				// no quests completed, did any progress at least?
 				if(progressed != null) {
 					try {
-						qm.switchQuest(player, progressed.getID());
+						qm.switchQuest(player, progressed);
 						qm.showProgress(player);
 						return;
 					} catch (QuesterException f) {
 						player.sendMessage(ChatColor.DARK_PURPLE + Quester.strings.ERROR_INTERESTING);
 					}
+				} else if(currentQuests.size() > 0){
+					// reselect first
+					qm.switchQuest(player, currentQuests.get(0));
 				}
-
-				// holder has none of your quests, default to picking up the quest
+				// nothing useful done so far.. check if they have more quests
 			}
-			// player doesn't have quest
+			// take a quest from them
 			if(qm.isQuestActive(selected)) {
 				try {
 					qm.startQuest(player, qm.getQuestNameByID(selected), false);
+					qh.selectNext();
 				} catch (QuesterException e) {
 					player.sendMessage(e.message());
 				}
@@ -153,27 +156,35 @@ public class Citizens2Listener implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onAnyClick(NPCRightClickEvent event) {
 		Player player = event.getClicker();
-    	Quest quest = qm.getPlayerQuest(player.getName());
-	    if(quest != null) {
-	    	if(!quest.allowedWorld(player.getWorld().getName().toLowerCase()))
-	    		return;
-	    	List<Objective> objs = quest.getObjectives();
-	    	for(int i = 0; i < objs.size(); i++) {
-	    		if(objs.get(i).getType().equalsIgnoreCase("NPC")) {
-		    		if(!qm.isObjectiveActive(player, i)){
-	    				continue;
-	    			}
-	    			NpcObjective obj = (NpcObjective)objs.get(i);
-	    			if(obj.checkNpc(event.getNPC().getId())) {
-	    				qm.incProgress(player, i);
-	    				if(obj.getCancel()) {
-	    					event.setCancelled(true);
-	    				}
-	    				return;
-	    			}
-	    		}
-	    	}
+		// try the NPC against ALL of your quests..
+		List<Quest> currentQuests = qm.getPlayerQuests(player.getName());
+		for(Quest quest : currentQuests) {
+			if(quest != null) {
+		    	if(!quest.allowedWorld(player.getWorld().getName().toLowerCase()))
+		    		continue;
+		    	List<Objective> objs = quest.getObjectives();
+		    	for(int i = 0; i < objs.size(); i++) {
+		    		if(objs.get(i).getType().equalsIgnoreCase("NPC")) {
+		    			qm.switchQuest(player, quest);
+		    			if(!qm.isObjectiveActive(player, i)){
+		    				continue;
+		    			}
+		    			NpcObjective obj = (NpcObjective)objs.get(i);
+		    			if(obj.checkNpc(event.getNPC().getId())) {
+		    				qm.incProgress(player, i);
+		    				if(obj.getCancel()) {
+		    					event.setCancelled(true);
+		    				}
+		    				return;
+		    			}
+		    		}
+		    	}
+		    }
 	    }
+		if(currentQuests.size() > 0){
+			// reselect first
+			qm.switchQuest(player, currentQuests.get(0));
+		}
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -182,14 +193,16 @@ public class Citizens2Listener implements Listener {
 		if(player == null) {
 			return;
 		}
-    	Quest quest = qm.getPlayerQuest(player.getName());
-	    if(quest != null) {
+		// try the NPC against ALL of your quests..
+		List<Quest> currentQuests = qm.getPlayerQuests(player.getName());
+		for(Quest quest : currentQuests) {
 	    	if(!quest.allowedWorld(player.getWorld().getName().toLowerCase()))
 	    		return;
 	    	List<Objective> objs = quest.getObjectives();
 	    	for(int i = 0; i < objs.size(); i++) {
 	    		if(objs.get(i).getType().equalsIgnoreCase("NPCKILL")) {
-		    		if(!qm.isObjectiveActive(player, i)){
+	    			qm.switchQuest(player, quest);
+	    			if(!qm.isObjectiveActive(player, i)){
 	    				continue;
 	    			}
 	    			NpcKillObjective obj = (NpcKillObjective)objs.get(i);
@@ -200,5 +213,9 @@ public class Citizens2Listener implements Listener {
 	    		}
 	    	}
 	    }
+		if(currentQuests.size() > 0){
+			// reselect first
+			qm.switchQuest(player, currentQuests.get(0));
+		}
 	}
 }
