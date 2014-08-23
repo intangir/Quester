@@ -38,7 +38,7 @@ public class Quester extends JavaPlugin {
 
 		public YamlConfiguration config = null;
 		
-		public static final String LABEL = ChatColor.BLUE + "[" + ChatColor.GOLD + "Quester" + ChatColor.BLUE + "] ";
+		public static final String LABEL = "" + ChatColor.BLUE;
 		
 		public Quester() {
 			super();
